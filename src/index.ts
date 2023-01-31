@@ -1,6 +1,6 @@
-export type Test = {
+export type Test <ValueType extends TestedValueType>= {
   name: string;
-  scenario: () => boolean;
+  scenario: () => ExpectOutput<ValueType>;
 }
 
 type TestResult = {
@@ -8,16 +8,34 @@ type TestResult = {
   name: string
 };
 
-type Arg = number;
+type TestedValueType = number;
 
-export const expectEqual = (arg1: Arg, arg2: Arg) => {
-  return arg1 === arg2
+type ExpectEqualInput <ValueType extends TestedValueType>= {
+  expected: ValueType;
+  computed: ValueType;
+}
+
+type SuccessOutput = { result: boolean }
+type FailureOutput <ValueType extends TestedValueType> = {
+  result: boolean;
+  expected: ValueType;
+  computed: ValueType;
+}
+type ExpectOutput <ValueType extends TestedValueType>= SuccessOutput | FailureOutput<ValueType>
+
+
+export const expectEqual = <ValueType extends TestedValueType>(
+  {expected, computed}: ExpectEqualInput<ValueType>
+): ExpectOutput<ValueType> => {
+  return {
+    result: expected === computed,
+  }
 }
 
 
-const executeTest = (test: Test): TestResult => {
+const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): TestResult => {
   return {
-    result: test.scenario(),
+    result: test.scenario().result,
     name: test.name
   }
 }
@@ -34,7 +52,7 @@ const displayTestResult = (testResult: TestResult) => {
   console.log(`${emoji} ${testResult.name}`)
 }
 
-export const testRunner = (tests: Test[]) => {
+export const testRunner = <ValueType extends TestedValueType>(tests: Test<ValueType>[]) => {
   const testResults = tests.map(executeTest)
 
   testResults.forEach(displayTestResult)
