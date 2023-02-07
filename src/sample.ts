@@ -43,6 +43,17 @@ export const tests: Test<number>[] = [
       return expectEqual({expected: arg1, computed: arg2})
     },
     skip: true,
+  },
+  {
+    name: "Only test that should be run",
+    scenario: () => {
+      // GIVEN
+      const arg1 = 12;
+      const arg2 = 11;
+
+      return expectEqual({expected: arg1, computed: arg2})
+    },
+    only: true,
   }
 
 ]
