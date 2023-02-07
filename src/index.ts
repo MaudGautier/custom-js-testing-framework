@@ -3,10 +3,15 @@ export type Test <ValueType extends TestedValueType>= {
   scenario: () => ExpectOutput<ValueType>;
 }
 
-type TestResult = {
-  result: boolean,
-  name: string
-};
+type FailedTestResult<ValueType extends TestedValueType> = FailedOutput<ValueType> & {
+  name: string,
+}
+
+type SuccessfulTestResult = SuccessfulOutput & {
+  name: string,
+}
+
+type TestResult<ValueType extends TestedValueType> = SuccessfulTestResult | FailedTestResult<ValueType>;
 
 type TestedValueType = number;
 
@@ -15,41 +20,61 @@ type ExpectEqualInput <ValueType extends TestedValueType>= {
   computed: ValueType;
 }
 
-type SuccessOutput = { result: boolean }
-type FailureOutput <ValueType extends TestedValueType> = {
-  result: boolean;
+type DisplayableOutput = {
+  display: (name: string) => void;
+}
+
+type SuccessfulOutput = { result: true } & DisplayableOutput;
+
+type FailedOutput <ValueType extends TestedValueType> = {
+  result: false;
   expected: ValueType;
   computed: ValueType;
-}
-type ExpectOutput <ValueType extends TestedValueType>= SuccessOutput | FailureOutput<ValueType>
+} & DisplayableOutput;
+
+type ExpectOutput <ValueType extends TestedValueType>= SuccessfulOutput | FailedOutput<ValueType>
+
+
+
 
 
 export const expectEqual = <ValueType extends TestedValueType>(
   {expected, computed}: ExpectEqualInput<ValueType>
 ): ExpectOutput<ValueType> => {
+  if (expected === computed) {
+    return {
+      result: true,
+      display: (name) => {
+        return `✅ ${name}`
+      },
+    }
+  }
+
   return {
-    result: expected === computed,
+    result: false,
+    expected,
+    computed,
+    display: (name) => {
+      return `❌ ${name}
+      Expected: ${expected}
+      But got: ${computed}`
+    },
   }
 }
 
 
-const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): TestResult => {
+const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): TestResult<ValueType> => {
+  const output = test.scenario();
   return {
-    result: test.scenario().result,
-    name: test.name
+    ...output,
+    name: test.name,
   }
 }
 
 
-const EMOJI: Record<"success" | "fail", string> = {
-  "success": "✅",
-  "fail": "❌"
-}
 
-const displayTestResult = (testResult: TestResult) => {
-  const status = testResult.result === true ? "success" : "fail";
-  const emoji = EMOJI[status]
-  console.log(`${emoji} ${testResult.name}`)
+const displayTestResult = <ValueType extends TestedValueType>(testResult: TestResult<ValueType>) => {
+  console.log(testResult.display(testResult.name))
 }
 
 export const testRunner = <ValueType extends TestedValueType>(tests: Test<ValueType>[]) => {
