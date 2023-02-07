@@ -32,7 +32,19 @@ export const tests: Test<number>[] = [
 
       return expectEqual({expected: arg1, computed: arg2})
     },
+  },
+  {
+    name: "Test that should be skipped",
+    scenario: () => {
+      // GIVEN
+      const arg1 = 12;
+      const arg2 = 11;
+
+      return expectEqual({expected: arg1, computed: arg2})
+    },
+    skip: true,
   }
+
 ]
 
 testRunner(tests)

@@ -1,6 +1,7 @@
 export type Test <ValueType extends TestedValueType>= {
   name: string;
   scenario: () => ExpectOutput<ValueType>;
+  skip?: boolean;
 }
 
 type FailedTestResult<ValueType extends TestedValueType> = FailedOutput<ValueType> & {
@@ -86,13 +87,19 @@ const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): 
 }
 
 
+const selectTestsToRun =<ValueType extends TestedValueType>(tests: Test<ValueType>[]) => {
+  return tests.filter(test => Boolean(!test.skip))
+}
+
 
 const displayTestResult = <ValueType extends TestedValueType>(testResult: TestResult<ValueType>) => {
   console.log(testResult.display(testResult.name))
 }
 
 export const testRunner = <ValueType extends TestedValueType>(tests: Test<ValueType>[]) => {
-  const testResults = tests.map(executeTest)
+  const testsToRun = selectTestsToRun(tests)
+
+  const testResults = testsToRun.map(executeTest)
 
   testResults.forEach(displayTestResult)
 
