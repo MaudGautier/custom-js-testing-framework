@@ -11,7 +11,9 @@ type SuccessfulTestResult = SuccessfulOutput & {
   name: string,
 }
 
-type TestResult<ValueType extends TestedValueType> = SuccessfulTestResult | FailedTestResult<ValueType>;
+type ErroredTestResult = { result: "error", error: string, name: string } & DisplayableTestResult;
+
+type TestResult<ValueType extends TestedValueType> = SuccessfulTestResult | FailedTestResult<ValueType> | ErroredTestResult;
 
 type TestedValueType = number;
 
@@ -20,17 +22,17 @@ type ExpectEqualInput <ValueType extends TestedValueType>= {
   computed: ValueType;
 }
 
-type DisplayableOutput = {
+type DisplayableTestResult = {
   display: (name: string) => void;
 }
 
-type SuccessfulOutput = { result: true } & DisplayableOutput;
+type SuccessfulOutput = { result: "success" } & DisplayableTestResult;
 
 type FailedOutput <ValueType extends TestedValueType> = {
-  result: false;
+  result: "failure";
   expected: ValueType;
   computed: ValueType;
-} & DisplayableOutput;
+} & DisplayableTestResult;
 
 type ExpectOutput <ValueType extends TestedValueType>= SuccessfulOutput | FailedOutput<ValueType>
 
@@ -43,7 +45,7 @@ export const expectEqual = <ValueType extends TestedValueType>(
 ): ExpectOutput<ValueType> => {
   if (expected === computed) {
     return {
-      result: true,
+      result: "success",
       display: (name) => {
         return `✅ ${name}`
       },
@@ -51,7 +53,7 @@ export const expectEqual = <ValueType extends TestedValueType>(
   }
 
   return {
-    result: false,
+    result: "failure",
     expected,
     computed,
     display: (name) => {
@@ -64,10 +66,22 @@ export const expectEqual = <ValueType extends TestedValueType>(
 
 
 const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): TestResult<ValueType> => {
-  const output = test.scenario();
-  return {
-    ...output,
-    name: test.name,
+  try {
+    const output = test.scenario();
+
+    return {
+      ...output,
+      name: test.name,
+    }
+  } catch (e) {
+    return {
+      error: e,
+      result: "error",
+      name: test.name,
+      display: (name) => {
+        return `⚠️  ERROR IN TEST ${name} !! 
+      Got the following error: ${e}`}
+    };
   }
 }
 

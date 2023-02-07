@@ -20,6 +20,18 @@ export const tests: Test<number>[] = [
 
       return expectEqual({expected: arg1, computed: arg2})
     },
+  },
+  {
+    name: "Test that throws an error",
+    scenario: () => {
+      // GIVEN
+      const arg1 = 12;
+      const arg2 = 11;
+
+      throw new Error("I throw an error")
+
+      return expectEqual({expected: arg1, computed: arg2})
+    },
   }
 ]
 
