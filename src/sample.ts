@@ -6,9 +6,9 @@ export const testsWithSomeSkipped: Test<any>[] = [
     scenario: () => {
       // GIVEN
       const arg1 = 12;
-      const arg2 = 12
+      const arg2 = 12;
 
-      return expectEqual({expected: arg1, computed: arg2})
+      return expectEqual({ expected: arg1, computed: arg2 });
     },
   },
   {
@@ -16,9 +16,9 @@ export const testsWithSomeSkipped: Test<any>[] = [
     scenario: () => {
       // GIVEN
       const arg1 = 12;
-      const arg2 = 11
+      const arg2 = 11;
 
-      return expectEqual({expected: arg1, computed: arg2})
+      return expectEqual({ expected: arg1, computed: arg2 });
     },
   },
   {
@@ -28,9 +28,9 @@ export const testsWithSomeSkipped: Test<any>[] = [
       const arg1 = 12;
       const arg2 = 11;
 
-      throw new Error("I throw an error")
+      throw new Error("I throw an error");
 
-      return expectEqual({expected: arg1, computed: arg2})
+      return expectEqual({ expected: arg1, computed: arg2 });
     },
   },
   {
@@ -40,11 +40,11 @@ export const testsWithSomeSkipped: Test<any>[] = [
       const arg1 = 12;
       const arg2 = 11;
 
-      return expectEqual({expected: arg1, computed: arg2})
+      return expectEqual({ expected: arg1, computed: arg2 });
     },
-    modulator: "skip"
+    modulator: "skip",
   },
-]
+];
 
 export const testsWithSomeOnly: Test<any>[] = [
   {
@@ -52,9 +52,9 @@ export const testsWithSomeOnly: Test<any>[] = [
     scenario: () => {
       // GIVEN
       const arg1 = 12;
-      const arg2 = 12
+      const arg2 = 12;
 
-      return expectEqual({expected: arg1, computed: arg2})
+      return expectEqual({ expected: arg1, computed: arg2 });
     },
   },
   {
@@ -62,9 +62,9 @@ export const testsWithSomeOnly: Test<any>[] = [
     scenario: () => {
       // GIVEN
       const arg1 = 12;
-      const arg2 = 11
+      const arg2 = 11;
 
-      return expectEqual({expected: arg1, computed: arg2})
+      return expectEqual({ expected: arg1, computed: arg2 });
     },
   },
   {
@@ -74,9 +74,9 @@ export const testsWithSomeOnly: Test<any>[] = [
       const arg1 = 12;
       const arg2 = 11;
 
-      throw new Error("I throw an error")
+      throw new Error("I throw an error");
 
-      return expectEqual({expected: arg1, computed: arg2})
+      return expectEqual({ expected: arg1, computed: arg2 });
     },
   },
   {
@@ -86,9 +86,9 @@ export const testsWithSomeOnly: Test<any>[] = [
       const arg1 = 12;
       const arg2 = 11;
 
-      return expectEqual({expected: arg1, computed: arg2})
+      return expectEqual({ expected: arg1, computed: arg2 });
     },
-    modulator: "only"
+    modulator: "only",
   },
   {
     name: "Only test that should be run (test2)",
@@ -97,68 +97,67 @@ export const testsWithSomeOnly: Test<any>[] = [
       const arg1 = 12;
       const arg2 = 11;
 
-      return expectEqual({expected: arg1, computed: arg2})
+      return expectEqual({ expected: arg1, computed: arg2 });
     },
-    modulator: "only"
-  }
-]
+    modulator: "only",
+  },
+];
 
 const testsWithMocks: Test<any>[] = [
   {
     name: "Test with a stub",
     scenario: () => {
       // GIVEN
-      const stub = () => { return 12 }
+      const stub = () => {
+        return 12;
+      };
       const value = 1;
 
       const functionWithADependency = (dependency: () => number) => (value: number) => {
-        const value1 = dependency()
-        return value1 + value
-      }
-
+        const value1 = dependency();
+        return value1 + value;
+      };
 
       // WHEN
-      const result = functionWithADependency(stub)(value)
+      const result = functionWithADependency(stub)(value);
 
-      return expectEqual({expected: 12 + 1, computed: result })
-    }
+      return expectEqual({ expected: 12 + 1, computed: result });
+    },
   },
   {
     name: "Test with a stub that changes over time",
     scenario: () => {
       // GIVEN
-      function* generator1 () {
-        yield 100
-        yield 10
+      function* generator1() {
+        yield 100;
+        yield 10;
       }
+
       // [] => generator
-      const stub = stubGenerator([100, 10])
+      const stub = stubGenerator([100, 10]);
+      // const stub = stubGenerator.callValueOnce(100).callValueOnce(10);
 
       const value = 1;
 
       const functionWithADependency = (dependency: any) => (value: number) => {
-        const value1 = dependency()
-        const value2 = dependency()
-        return value1 + value2 + value
-      }
-
+        const value1 = dependency();
+        const value2 = dependency();
+        return value1 + value2 + value;
+      };
 
       // WHEN
-      const result = functionWithADependency(stub)(value)
+      const result = functionWithADependency(stub)(value);
 
       // THEN
-      return expectEqual({expected: 111, computed: result })
-    }
-  }
-]
+      return expectEqual({ expected: 111, computed: result });
+    },
+  },
+];
 
+const describeWithSomeSkipped: Describe = { name: "Some tests are skipped", tests: testsWithSomeSkipped };
+const describeWithSomeOnly: Describe = { name: "Only `only` should run", tests: testsWithSomeOnly };
+const describeWithMocks: Describe = { name: "Tests with mocks", tests: testsWithMocks };
 
-
-
-const describeWithSomeSkipped: Describe = {name: "Some tests are skipped", tests: testsWithSomeSkipped}
-const describeWithSomeOnly: Describe = {name: "Only `only` should run", tests: testsWithSomeOnly}
-const describeWithMocks: Describe = {name: "Tests with mocks", tests: testsWithMocks}
-
-testRunner(describeWithSomeSkipped)
-testRunner(describeWithSomeOnly)
-testRunner(describeWithMocks)
+testRunner(describeWithSomeSkipped);
+testRunner(describeWithSomeOnly);
+testRunner(describeWithMocks);
