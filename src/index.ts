@@ -1,8 +1,13 @@
+type Modulator = "skip" | "only"
 export type Test <ValueType extends TestedValueType>= {
   name: string;
   scenario: () => ExpectOutput<ValueType>;
-  skip?: boolean;
-  only?: boolean;
+  modulator?: Modulator
+}
+
+export type Describe = {
+  name: string;
+  tests: Test<any>[]
 }
 
 type FailedTestResult<ValueType extends TestedValueType> = FailedOutput<ValueType> & {
@@ -89,13 +94,13 @@ const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): 
 
 
 const selectTestsToRun =<ValueType extends TestedValueType>(tests: Test<ValueType>[]) => {
-  const onlyTests = tests.filter(test => Boolean(test.only));
+  const onlyTests = tests.filter(test => Boolean(test.modulator === "only"));
 
   if (onlyTests.length > 0) {
-    return onlyTests.filter(test => Boolean(!test.skip))
+    return onlyTests.filter(test => Boolean(test.modulator !== "skip"))
   }
 
-  return tests.filter(test => Boolean(!test.skip))
+  return tests.filter(test => Boolean(test.modulator !== "skip"))
 }
 
 
