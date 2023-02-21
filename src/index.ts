@@ -1,62 +1,62 @@
-type Modulator = "skip" | "only"
-export type Test <ValueType extends TestedValueType>= {
+type Modulator = "skip" | "only";
+export type Test<ValueType extends TestedValueType> = {
   name: string;
   scenario: () => ExpectOutput<ValueType>;
-  modulator?: Modulator
-}
+  modulator?: Modulator;
+};
 
 export type Describe = {
   name: string;
-  tests: Test<any>[]
-}
+  tests: Test<any>[];
+};
 
 type FailedTestResult<ValueType extends TestedValueType> = FailedOutput<ValueType> & {
-  name: string,
-}
+  name: string;
+};
 
 type SuccessfulTestResult = SuccessfulOutput & {
-  name: string,
-}
+  name: string;
+};
 
-type ErroredTestResult = { result: "error", error: string, name: string } & DisplayableTestResult;
+type ErroredTestResult = { result: "error"; error: string; name: string } & DisplayableTestResult;
 
-type TestResult<ValueType extends TestedValueType> = SuccessfulTestResult | FailedTestResult<ValueType> | ErroredTestResult;
+type TestResult<ValueType extends TestedValueType> =
+  | SuccessfulTestResult
+  | FailedTestResult<ValueType>
+  | ErroredTestResult;
 
 type TestedValueType = number;
 
-type ExpectEqualInput <ValueType extends TestedValueType>= {
+type ExpectEqualInput<ValueType extends TestedValueType> = {
   expected: ValueType;
   computed: ValueType;
-}
+};
 
 type DisplayableTestResult = {
   display: (name: string) => void;
-}
+};
 
 type SuccessfulOutput = { result: "success" } & DisplayableTestResult;
 
-type FailedOutput <ValueType extends TestedValueType> = {
+type FailedOutput<ValueType extends TestedValueType> = {
   result: "failure";
   expected: ValueType;
   computed: ValueType;
 } & DisplayableTestResult;
 
-type ExpectOutput <ValueType extends TestedValueType>= SuccessfulOutput | FailedOutput<ValueType>
+type ExpectOutput<ValueType extends TestedValueType> = SuccessfulOutput | FailedOutput<ValueType>;
 
-
-
-
-
-export const expectEqual = <ValueType extends TestedValueType>(
-  {expected, computed}: ExpectEqualInput<ValueType>
-): ExpectOutput<ValueType> => {
+export const expectEqual = <ValueType extends TestedValueType>({
+  expected,
+  computed,
+}: ExpectEqualInput<ValueType>): ExpectOutput<ValueType> => {
   if (expected === computed) {
     return {
       result: "success",
       display: (name) => {
-        return `✅ ${name}`
+        return `✅ ${name}`;
       },
-    }
+    };
   }
 
   return {
@@ -66,11 +66,10 @@ export const expectEqual = <ValueType extends TestedValueType>(
     display: (name) => {
       return `❌ ${name}
       Expected: ${expected}
-      But got: ${computed}`
+      But got: ${computed}`;
     },
-  }
-}
-
+  };
+};
 
 const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): TestResult<ValueType> => {
   try {
@@ -79,7 +78,7 @@ const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): 
     return {
       ...output,
       name: test.name,
-    }
+    };
   } catch (e) {
     return {
       error: e,
@@ -87,41 +86,55 @@ const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): 
       name: test.name,
       display: (name) => {
         return `⚠️  ERROR IN TEST ${name} !! 
-      Got the following error: ${e}`}
+      Got the following error: ${e}`;
+      },
     };
   }
-}
+};
 
-
-const selectTestsToRun =<ValueType extends TestedValueType>(tests: Test<ValueType>[]) => {
-  const onlyTests = tests.filter(test => Boolean(test.modulator === "only"));
+const selectTestsToRun = <ValueType extends TestedValueType>(tests: Test<ValueType>[]) => {
+  const onlyTests = tests.filter((test) => Boolean(test.modulator === "only"));
 
   if (onlyTests.length > 0) {
-    return onlyTests.filter(test => Boolean(test.modulator !== "skip"))
+    return onlyTests.filter((test) => Boolean(test.modulator !== "skip"));
   }
 
-  return tests.filter(test => Boolean(test.modulator !== "skip"))
-}
-
+  return tests.filter((test) => Boolean(test.modulator !== "skip"));
+};
 
 const displayTestResult = <ValueType extends TestedValueType>(testResult: TestResult<ValueType>) => {
-  console.log(testResult.display(testResult.name))
-}
+  console.log(testResult.display(testResult.name));
+};
 
 const displayDescribe = (describe: Describe) => {
-  console.log(`\n--------- ${describe.name} ----------`)
-}
+  console.log(`\n--------- ${describe.name} ----------`);
+};
 
 export const testRunner = <ValueType extends TestedValueType>(describe: Describe) => {
   const tests = describe.tests;
-  const testsToRun = selectTestsToRun(tests)
+  const testsToRun = selectTestsToRun(tests);
 
-  const testResults = testsToRun.map(executeTest)
+  const testResults = testsToRun.map(executeTest);
 
-  displayDescribe(describe)
+  displayDescribe(describe);
 
-  testResults.forEach(displayTestResult)
+  testResults.forEach(displayTestResult);
 
   // displayFullReport(testResults)
-}
+};
 
+export const stubGenerator = <T>(values: T[]) => {
+  function* generator(): Generator<T, T, T> {
+    for (let i = 0; i < values.length; i++) {
+      yield values[i];
+    }
+    return undefined;
+  }
+
+  const generatorInstance = generator();
+
+  return (): T => {
+    const a = generatorInstance.next();
+    return a.value;
+  };
+};
