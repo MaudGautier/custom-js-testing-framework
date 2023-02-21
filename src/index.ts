@@ -108,10 +108,17 @@ const displayTestResult = <ValueType extends TestedValueType>(testResult: TestRe
   console.log(testResult.display(testResult.name))
 }
 
-export const testRunner = <ValueType extends TestedValueType>(tests: Test<ValueType>[]) => {
+const displayDescribe = (describe: Describe) => {
+  console.log(`\n--------- ${describe.name} ----------`)
+}
+
+export const testRunner = <ValueType extends TestedValueType>(describe: Describe) => {
+  const tests = describe.tests;
   const testsToRun = selectTestsToRun(tests)
 
   const testResults = testsToRun.map(executeTest)
+
+  displayDescribe(describe)
 
   testResults.forEach(displayTestResult)
 

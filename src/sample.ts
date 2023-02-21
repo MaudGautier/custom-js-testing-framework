@@ -1,6 +1,6 @@
-import { expectEqual, Test, testRunner } from "./index";
+import { Describe, expectEqual, Test, testRunner } from "./index";
 
-export const tests: Test<number>[] = [
+export const testsWithSomeSkipped: Test<any>[] = [
   {
     name: "Test that passes",
     scenario: () => {
@@ -42,10 +42,45 @@ export const tests: Test<number>[] = [
 
       return expectEqual({expected: arg1, computed: arg2})
     },
-    skip: true,
+    modulator: "skip"
+  },
+]
+
+export const testsWithSomeOnly: Test<any>[] = [
+  {
+    name: "Test that passes",
+    scenario: () => {
+      // GIVEN
+      const arg1 = 12;
+      const arg2 = 12
+
+      return expectEqual({expected: arg1, computed: arg2})
+    },
   },
   {
-    name: "Only test that should be run",
+    name: "Test that fails",
+    scenario: () => {
+      // GIVEN
+      const arg1 = 12;
+      const arg2 = 11
+
+      return expectEqual({expected: arg1, computed: arg2})
+    },
+  },
+  {
+    name: "Test that throws an error",
+    scenario: () => {
+      // GIVEN
+      const arg1 = 12;
+      const arg2 = 11;
+
+      throw new Error("I throw an error")
+
+      return expectEqual({expected: arg1, computed: arg2})
+    },
+  },
+  {
+    name: "Only test that should be run (test1)",
     scenario: () => {
       // GIVEN
       const arg1 = 12;
@@ -53,9 +88,24 @@ export const tests: Test<number>[] = [
 
       return expectEqual({expected: arg1, computed: arg2})
     },
-    only: true,
-  }
+    modulator: "only"
+  },
+  {
+    name: "Only test that should be run (test2)",
+    scenario: () => {
+      // GIVEN
+      const arg1 = 12;
+      const arg2 = 11;
 
+      return expectEqual({expected: arg1, computed: arg2})
+    },
+    modulator: "only"
+  }
 ]
 
-testRunner(tests)
+
+const describeWithSomeSkipped: Describe = {name: "Some tests are skipped", tests: testsWithSomeSkipped}
+const describeWithSomeOnly: Describe = {name: "Only `only` should run", tests: testsWithSomeOnly}
+
+testRunner(describeWithSomeSkipped)
+testRunner(describeWithSomeOnly)
