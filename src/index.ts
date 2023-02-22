@@ -123,18 +123,25 @@ export const testRunner = <ValueType extends TestedValueType>(describe: Describe
   // displayFullReport(testResults)
 };
 
-export const stubGenerator = <T>(values: T[]) => {
-  function* generator(): Generator<T, T, T> {
-    for (let i = 0; i < values.length; i++) {
-      yield values[i];
-    }
-    return undefined;
-  }
+export const createMock = <T>(values: T[] = []) => {
+  return {
+    returnValueOnce: (value) => {
+      return createMock([...values, value]);
+    },
+    finalize: () => {
+      function* generator(): Generator<T, T, T> {
+        for (let i = 0; i < values.length; i++) {
+          yield values[i];
+        }
+        return undefined;
+      }
 
-  const generatorInstance = generator();
+      const generatorInstance = generator();
 
-  return (): T => {
-    const a = generatorInstance.next();
-    return a.value;
+      return (): T => {
+        const a = generatorInstance.next();
+        return a.value;
+      };
+    },
   };
 };

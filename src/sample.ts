@@ -1,4 +1,4 @@
-import { Describe, expectEqual, stubGenerator, Test, testRunner } from "./index";
+import { createMock, Describe, expectEqual, Test, testRunner } from "./index";
 
 export const testsWithSomeSkipped: Test<any>[] = [
   {
@@ -128,17 +128,8 @@ const testsWithMocks: Test<any>[] = [
     name: "Test with a stub that changes over time",
     scenario: () => {
       // GIVEN
-      function* generator1() {
-        yield 100;
-        yield 10;
-      }
-
-      // [] => generator
-      const stub = stubGenerator([100, 10]);
-      // const stub = stubGenerator.callValueOnce(100).callValueOnce(10);
-
+      const stub = createMock().returnValueOnce(100).returnValueOnce(10).finalize();
       const value = 1;
-
       const functionWithADependency = (dependency: any) => (value: number) => {
         const value1 = dependency();
         const value2 = dependency();
