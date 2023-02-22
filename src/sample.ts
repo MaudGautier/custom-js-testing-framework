@@ -128,7 +128,7 @@ const testsWithMocks: Test<any>[] = [
     name: "Test with a stub that changes over time",
     scenario: () => {
       // GIVEN
-      const stub = createMock().returnValueOnce(100).returnValueOnce(10).finalize();
+      const stub = createMock().returnValueOnce(100).returnValueOnce(10);
       const value = 1;
       const functionWithADependency = (dependency: any) => (value: number) => {
         const value1 = dependency();

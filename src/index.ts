@@ -124,24 +124,23 @@ export const testRunner = <ValueType extends TestedValueType>(describe: Describe
 };
 
 export const createMock = <T>(values: T[] = []) => {
-  return {
-    returnValueOnce: (value) => {
-      return createMock([...values, value]);
-    },
-    finalize: () => {
-      function* generator(): Generator<T, T, T> {
-        for (let i = 0; i < values.length; i++) {
-          yield values[i];
-        }
-        return undefined;
-      }
+  function* generator(): Generator<T, T | undefined, T> {
+    for (let i = 0; i < values.length; i++) {
+      yield values[i];
+    }
+    return undefined;
+  }
 
-      const generatorInstance = generator();
-
-      return (): T => {
-        const a = generatorInstance.next();
-        return a.value;
-      };
-    },
+  const generatorInstance = generator();
+  const mockingFunction = (): T | undefined => {
+    const a = generatorInstance.next();
+    return a.value;
   };
+  mockingFunction.returnValueOnce = (value: T) => {
+    return createMock([...values, value]);
+  };
+  return mockingFunction;
 };
+
+// createMock([100, 10])();
+// createMock().returnValueOnce(10);
