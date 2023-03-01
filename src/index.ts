@@ -51,11 +51,21 @@ type FailedOutput<ValueType extends TestedValueType> = {
 
 type FailedMockOutput = {
   result: "failure";
-  expectedNumberOfCalls: number;
+  expectedNumberOfCalls?: number;
   actualNumberOfCalls: number;
 } & DisplayableTestResult;
 
-type ExpectOutput<ValueType extends TestedValueType> = SuccessfulOutput | FailedOutput<ValueType> | FailedMockOutput;
+type ExpectOutput<ValueType extends TestedValueType = any> =
+  | SuccessfulOutput
+  | FailedOutput<ValueType>
+  | FailedMockOutput;
+
+type Mock = {
+  (): unknown;
+  returnValueOnce: (value: any) => any;
+  expectToHaveBeenCalledNTimes: (nTimes: number) => ExpectOutput;
+  expectToHaveBeenCalled: () => ExpectOutput;
+};
 
 export const expectEqual = <ValueType extends TestedValueType>({
   expected,
@@ -81,65 +91,6 @@ export const expectEqual = <ValueType extends TestedValueType>({
     },
   };
 };
-
-type Mock = {
-  (): unknown;
-  returnValueOnce: (value: any) => any;
-  getHasBeenCalled: () => boolean;
-  getHasBeenCalledNTimes: () => number;
-};
-
-export const expectToHaveBeenCalled = (mock: Mock): ExpectOutput<any> => {
-  if (mock.getHasBeenCalled() === true) {
-    return {
-      result: "success",
-      display: (name) => {
-        return `✅ ${name}`;
-      },
-    };
-  }
-
-  const expectedNumberOfCalls = 1; // ????
-  const actualNumberOfCalls = 0;
-
-  return {
-    result: "failure",
-    expectedNumberOfCalls,
-    actualNumberOfCalls,
-    display: (name) => {
-      return `❌ ${name}
-      Expected to have been called ${expectedNumberOfCalls} times.
-      But got called ${actualNumberOfCalls} times.`;
-    },
-  };
-};
-
-export const expectToHaveBeenCalledNTimes =
-  (nTimes: number) =>
-  (mock: Mock): ExpectOutput<any> => {
-    const expectedNumberOfCalls = nTimes;
-    const actualNumberOfCalls = mock.getHasBeenCalledNTimes();
-
-    if (expectedNumberOfCalls === actualNumberOfCalls) {
-      return {
-        result: "success",
-        display: (name) => {
-          return `✅ ${name}`;
-        },
-      };
-    }
-
-    return {
-      result: "failure",
-      expectedNumberOfCalls,
-      actualNumberOfCalls,
-      display: (name) => {
-        return `❌ ${name}
-      Expected to have been called ${expectedNumberOfCalls} times.
-      But got called ${actualNumberOfCalls} times.`;
-      },
-    };
-  };
 
 const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): TestResult<ValueType> => {
   try {
@@ -193,7 +144,7 @@ export const testRunner = <ValueType extends TestedValueType>(describe: Describe
   // displayFullReport(testResults)
 };
 
-export const createMock = <T>(values: T[] = []) => {
+export const createMock = <T>(values: T[] = []): Mock => {
   function* generator(): Generator<T, T | undefined, T> {
     for (let i = 0; i < values.length; i++) {
       yield values[i];
@@ -214,9 +165,69 @@ export const createMock = <T>(values: T[] = []) => {
     return createMock([...values, value]);
   };
 
-  mockingFunction.getHasBeenCalled = () => hasBeenCalled;
+  mockingFunction.expectToHaveBeenCalledNTimes = (nTimes: number): ExpectOutput => {
+    const expectedNumberOfCalls = nTimes;
+    const actualNumberOfCalls = hasBeenCalledNTimes;
+    return createExpectToHaveBeenCalledNTimesResult({ expectedNumberOfCalls, actualNumberOfCalls });
+  };
+  mockingFunction.expectToHaveBeenCalled = (): ExpectOutput => {
+    const actualNumberOfCalls = hasBeenCalledNTimes;
+
+    return createExpectToHaveBeenCalledResult({
+      actualNumberOfCalls,
+    });
+  };
 
   return mockingFunction;
+};
+
+const createExpectToHaveBeenCalledResult = ({ actualNumberOfCalls }: { actualNumberOfCalls: number }): ExpectOutput => {
+  if (actualNumberOfCalls >= 1) {
+    return {
+      result: "success",
+      display: (name) => {
+        return `✅ ${name}`;
+      },
+    };
+  }
+
+  return {
+    result: "failure",
+    actualNumberOfCalls,
+    display: (name) => {
+      return `❌ ${name}
+      Expected to have been called at least once.
+      But got called ${actualNumberOfCalls} times.`;
+    },
+  };
+};
+
+const createExpectToHaveBeenCalledNTimesResult = ({
+  expectedNumberOfCalls,
+  actualNumberOfCalls,
+}: {
+  expectedNumberOfCalls: number;
+  actualNumberOfCalls: number;
+}): ExpectOutput => {
+  if (expectedNumberOfCalls === actualNumberOfCalls) {
+    return {
+      result: "success",
+      display: (name) => {
+        return `✅ ${name}`;
+      },
+    };
+  }
+
+  return {
+    result: "failure",
+    expectedNumberOfCalls,
+    actualNumberOfCalls,
+    display: (name) => {
+      return `❌ ${name}
+      Expected to have been called ${expectedNumberOfCalls} times.
+      But got called ${actualNumberOfCalls} times.`;
+    },
+  };
 };
 
 // createMock([100, 10])();

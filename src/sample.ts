@@ -1,12 +1,4 @@
-import {
-  createMock,
-  Describe,
-  expectEqual,
-  expectToHaveBeenCalled,
-  expectToHaveBeenCalledNTimes,
-  Test,
-  testRunner,
-} from "./index";
+import { createMock, Describe, expectEqual, Test, testRunner } from "./index";
 
 export const testsWithSomeSkipped: Test<any>[] = [
   {
@@ -167,7 +159,86 @@ const testsWithMocks: Test<any>[] = [
       functionWithADependency(stub)(value);
 
       // THEN
-      return expectToHaveBeenCalled(stub);
+      return stub.expectToHaveBeenCalled();
+    },
+  },
+  {
+    name: "Test on expectToHaveBeenCalled that should pass as it has been called twice",
+    modulator: "only",
+    scenario: () => {
+      // GIVEN
+      const stub = createMock().returnValueOnce(200).returnValueOnce(20);
+      const functionWithADependency = (dependency: any) => (value: number) => {
+        const value1 = dependency();
+        return value + value1;
+      };
+
+      // WHEN
+      functionWithADependency(stub)(1);
+      functionWithADependency(stub)(2);
+
+      // THEN
+      return stub.expectToHaveBeenCalled();
+    },
+  },
+  {
+    name: "Test on expectToHaveBeenCalled that should fail as the dependency has *NOT* been called",
+    modulator: "only",
+    scenario: () => {
+      // GIVEN
+      const stub = createMock().returnValueOnce(200).returnValueOnce(20);
+      const value = 1;
+      const functionWithADependencyNotCalled = (dependency: any) => (value: number) => {
+        // DEPENDENDY IS NOT CALLED
+        const value1 = 1000;
+        return value + value1;
+      };
+
+      // WHEN
+      functionWithADependencyNotCalled(stub)(value);
+
+      // THEN
+      return stub.expectToHaveBeenCalled();
+    },
+  },
+  {
+    name: "Test on expectToHaveBeenCalled that should pass as it has been called 3 times",
+    modulator: "only",
+    scenario: () => {
+      // GIVEN
+      const stub = createMock().returnValueOnce(200).returnValueOnce(20).returnValueOnce(2);
+      const functionWithADependency = (dependency: any) => (value: number) => {
+        const value1 = dependency();
+        return value + value1;
+      };
+
+      // WHEN
+      functionWithADependency(stub)(1); // 201
+      functionWithADependency(stub)(2); // 22
+      functionWithADependency(stub)(3); // 5
+
+      // THEN
+      return stub.expectToHaveBeenCalledNTimes(3);
+    },
+  },
+  {
+    name: "Test on expectToHaveBeenCalled that should fail as it has been called 3 times",
+    modulator: "only",
+    scenario: () => {
+      // GIVEN
+      const stub = createMock().returnValueOnce(200).returnValueOnce(20).returnValueOnce(2);
+      const functionWithADependency = (dependency: any) => (value: number) => {
+        const value1 = dependency();
+        return value + value1;
+      };
+
+      // WHEN
+      functionWithADependency(stub)(1); // 201
+      functionWithADependency(stub)(2); // 22
+      functionWithADependency(stub)(3); // 5
+
+      // THEN
+      return stub.expectToHaveBeenCalledNTimes(2);
     },
   },
 ];
