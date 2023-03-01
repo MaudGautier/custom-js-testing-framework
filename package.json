@@ -4,7 +4,8 @@
   "description": "Starter repo for kata exercises with Node, TypeScript & Jest",
   "main": "src/index.js",
   "scripts": {
-    "test": "rm -f src/sample.js ; rm -f src/index.js ; ts-node src/sample.ts"
+    "test": "ts-node",
+    "run-test-list": "bash ./src/testBash.sh"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
