@@ -1,4 +1,4 @@
-import { createMock, Describe, expectEqual, Test, testRunner } from "./index";
+import { createMock, Describe, expectEqual, expectToHaveBeenCalled, Test, testRunner } from "./index";
 
 export const testsWithSomeSkipped: Test<any>[] = [
   {
@@ -141,6 +141,25 @@ const testsWithMocks: Test<any>[] = [
 
       // THEN
       return expectEqual({ expected: 111, computed: result });
+    },
+  },
+  {
+    name: "Test on expectToHaveBeenCalled that should pass as it has been called",
+    modulator: "only",
+    scenario: () => {
+      // GIVEN
+      const stub = createMock().returnValueOnce(200).returnValueOnce(20);
+      const value = 1;
+      const functionWithADependency = (dependency: any) => (value: number) => {
+        const value1 = dependency();
+        return value + value1;
+      };
+
+      // WHEN
+      functionWithADependency(stub)(value);
+
+      // THEN
+      return expectToHaveBeenCalled(stub);
     },
   },
 ];

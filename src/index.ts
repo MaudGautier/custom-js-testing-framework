@@ -14,6 +14,10 @@ type FailedTestResult<ValueType extends TestedValueType> = FailedOutput<ValueTyp
   name: string;
 };
 
+type FailedMockTestResult = FailedMockOutput & {
+  name: string;
+};
+
 type SuccessfulTestResult = SuccessfulOutput & {
   name: string;
 };
@@ -23,6 +27,7 @@ type ErroredTestResult = { result: "error"; error: string; name: string } & Disp
 type TestResult<ValueType extends TestedValueType> =
   | SuccessfulTestResult
   | FailedTestResult<ValueType>
+  | FailedMockTestResult
   | ErroredTestResult;
 
 type TestedValueType = number;
@@ -44,7 +49,13 @@ type FailedOutput<ValueType extends TestedValueType> = {
   computed: ValueType;
 } & DisplayableTestResult;
 
-type ExpectOutput<ValueType extends TestedValueType> = SuccessfulOutput | FailedOutput<ValueType>;
+type FailedMockOutput = {
+  result: "failure";
+  expectedNumberOfCalls: number;
+  actualNumberOfCalls: number;
+} & DisplayableTestResult;
+
+type ExpectOutput<ValueType extends TestedValueType> = SuccessfulOutput | FailedOutput<ValueType> | FailedMockOutput;
 
 export const expectEqual = <ValueType extends TestedValueType>({
   expected,
@@ -67,6 +78,36 @@ export const expectEqual = <ValueType extends TestedValueType>({
       return `❌ ${name}
       Expected: ${expected}
       But got: ${computed}`;
+    },
+  };
+};
+
+type Mock = {
+  (): unknown;
+  returnValueOnce: (value: any) => any;
+  getHasBeenCalled: () => boolean;
+};
+export const expectToHaveBeenCalled = (mock: Mock): ExpectOutput<any> => {
+  if (mock.getHasBeenCalled() === true) {
+    return {
+      result: "success",
+      display: (name) => {
+        return `✅ ${name}`;
+      },
+    };
+  }
+
+  const expectedNumberOfCalls = 1; // ????
+  const actualNumberOfCalls = 0;
+
+  return {
+    result: "failure",
+    expectedNumberOfCalls,
+    actualNumberOfCalls,
+    display: (name) => {
+      return `❌ ${name}
+      Expected to have been called ${expectedNumberOfCalls} times.
+      But got called ${actualNumberOfCalls} times.`;
     },
   };
 };
@@ -131,14 +172,19 @@ export const createMock = <T>(values: T[] = []) => {
     return undefined;
   }
 
+  let hasBeenCalled = false;
   const generatorInstance = generator();
   const mockingFunction = (): T | undefined => {
+    hasBeenCalled = true;
     const a = generatorInstance.next();
     return a.value;
   };
   mockingFunction.returnValueOnce = (value: T) => {
     return createMock([...values, value]);
   };
+
+  mockingFunction.getHasBeenCalled = () => hasBeenCalled;
+
   return mockingFunction;
 };
 
