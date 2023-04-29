@@ -100,7 +100,7 @@ const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): 
       ...output,
       name: test.name,
     };
-  } catch (e) {
+  } catch (e: any) {
     return {
       error: e,
       result: "error",
