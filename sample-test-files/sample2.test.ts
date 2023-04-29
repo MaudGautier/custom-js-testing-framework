@@ -1,4 +1,4 @@
-import { createMock, Describe, expectEqual, Test, testRunner } from "./index";
+import { createMock, Describe, expectEqual, Test, testRunner } from "../src";
 
 export const testsWithSomeSkipped: Test<any>[] = [
   {

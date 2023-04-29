@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "ts-node",
-    "run-test-list": "bash ./src/testBash.sh"
+    "run-test-list": "bash scripts/run-tests.sh"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
