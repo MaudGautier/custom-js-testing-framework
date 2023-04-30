@@ -1,8 +1,9 @@
 {
-  "name": "typescript-kata-starter",
+  "name": "custom-js-testing-framework",
   "version": "1.0.0",
-  "description": "Starter repo for kata exercises with Node, TypeScript & Jest",
-  "main": "src/index.js",
+  "description": "This custom JS testing framework aims at re-implementing the existing 'jest' testing framework so as to understand its underlying principles.",
+  "author": "Maud Gautier",
+  "main": "src/index.ts",
   "scripts": {
     "test": "ts-node",
     "run-test-list": "bash scripts/run-tests.sh"
