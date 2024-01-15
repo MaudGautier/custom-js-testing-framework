@@ -1,71 +1,4 @@
-type Modulator = "skip" | "only";
-export type Test<ValueType extends TestedValueType> = {
-  name: string;
-  scenario: () => ExpectOutput<ValueType>;
-  modulator?: Modulator;
-};
-
-export type Describe = {
-  name: string;
-  tests: Test<any>[];
-};
-
-type FailedTestResult<ValueType extends TestedValueType> = FailedOutput<ValueType> & {
-  name: string;
-};
-
-type FailedMockTestResult = FailedMockOutput & {
-  name: string;
-};
-
-type SuccessfulTestResult = SuccessfulOutput & {
-  name: string;
-};
-
-type ErroredTestResult = { result: "error"; error: string; name: string } & DisplayableTestResult;
-
-type TestResult<ValueType extends TestedValueType> =
-  | SuccessfulTestResult
-  | FailedTestResult<ValueType>
-  | FailedMockTestResult
-  | ErroredTestResult;
-
-type TestedValueType = number;
-
-type ExpectEqualInput<ValueType extends TestedValueType> = {
-  expected: ValueType;
-  computed: ValueType;
-};
-
-type DisplayableTestResult = {
-  display: (name: string) => void;
-};
-
-type SuccessfulOutput = { result: "success" } & DisplayableTestResult;
-
-type FailedOutput<ValueType extends TestedValueType> = {
-  result: "failure";
-  expected: ValueType;
-  computed: ValueType;
-} & DisplayableTestResult;
-
-type FailedMockOutput = {
-  result: "failure";
-  expectedNumberOfCalls?: number;
-  actualNumberOfCalls: number;
-} & DisplayableTestResult;
-
-type ExpectOutput<ValueType extends TestedValueType = any> =
-  | SuccessfulOutput
-  | FailedOutput<ValueType>
-  | FailedMockOutput;
-
-type Mock = {
-  (): unknown;
-  returnValueOnce: (value: any) => any;
-  expectToHaveBeenCalledNTimes: (nTimes: number) => ExpectOutput;
-  expectToHaveBeenCalled: () => ExpectOutput;
-};
+import { Describe, ExpectEqualInput, ExpectOutput, Mock, Test, TestedValueType, TestResult } from "./types";
 
 export const expectEqual = <ValueType extends TestedValueType>({
   expected,
@@ -152,11 +85,9 @@ export const createMock = <T>(values: T[] = []): Mock => {
     return undefined;
   }
 
-  let hasBeenCalled = false;
   let hasBeenCalledNTimes = 0;
   const generatorInstance = generator();
   const mockingFunction = (): T | undefined => {
-    hasBeenCalled = true;
     hasBeenCalledNTimes += 1;
     const a = generatorInstance.next();
     return a.value;
