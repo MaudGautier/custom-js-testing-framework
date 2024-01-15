@@ -52,6 +52,13 @@ export type ExpectEqualInput<ValueType extends SupportedValueType> = {
   computed: ValueType;
 };
 
+export type ExpectToHaveBeenCalledInput = { actualNumberOfCalls: number };
+
+export type ExpectToHaveBeenCalledNTimes = {
+  expectedNumberOfCalls: number;
+  actualNumberOfCalls: number;
+};
+
 // --------------------------------------- Test Results (For test execution) --------------------------------------- //
 
 type WithName<T> = T & { name: string };

@@ -1,5 +1,7 @@
 import { Describe, Test } from "../src/types";
-import { createMock, expectEqual, testRunner } from "../src";
+import { testRunner } from "../src/testRunner";
+import { expectEqual } from "../src/matchers";
+import { createMock } from "../src/mocks";
 
 export const testsWithSomeSkipped: Test<any>[] = [
   {

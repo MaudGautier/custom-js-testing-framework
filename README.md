@@ -58,20 +58,18 @@ $ npm test ./sample-test-files/sample.test.ts
       But got called 3 times.
 ```
 
-
-
 ## File organization
 
-The framework is in the `src/index.ts` file.
+The framework is in the `src/` folder.
 
-The `sample-test-files/` folder contains sample test files, defined in the format understandable 
-by this custom testing library.
+The `sample-test-files/` folder contains sample test files, defined in the format understandable by this custom testing
+library.
 
 ## Features list
 
 - [x] Display failing tests
 - [x] Display unexpected errors
-- [x] Add a `skip` feature to tests 
+- [x] Add a `skip` feature to tests
 - [x] Add a modulator: either `skip` OR `only`
 - [x] Add a `describe` option
 - [ ] Add a `skip` option on `describe` sections
