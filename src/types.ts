@@ -5,7 +5,9 @@ type DisplayableTestResult = {
 };
 
 // Expect inputs and outputs (used for any scenario)
-type SuccessfulOutput = { result: "success" } & DisplayableTestResult;
+type SuccessfulOutput = {
+  result: "success";
+} & DisplayableTestResult;
 
 type FailedOutput<ValueType extends SupportedValueType> = {
   result: "failure";
@@ -17,6 +19,11 @@ type FailedMockOutput = {
   result: "failure";
   expectedNumberOfCalls?: number;
   actualNumberOfCalls: number;
+} & DisplayableTestResult;
+
+type ErroredOutput = {
+  result: "error";
+  error: string;
 } & DisplayableTestResult;
 
 export type ExpectOutput<ValueType extends SupportedValueType = any> =
@@ -42,19 +49,12 @@ export type Describe = {
 };
 
 // Test result
-type FailedTestResult<ValueType extends SupportedValueType> = FailedOutput<ValueType> & {
-  name: string;
-};
+type WithName<T> = T & { name: string };
 
-type FailedMockTestResult = FailedMockOutput & {
-  name: string;
-};
-
-type SuccessfulTestResult = SuccessfulOutput & {
-  name: string;
-};
-
-type ErroredTestResult = { result: "error"; error: string; name: string } & DisplayableTestResult;
+type FailedTestResult<ValueType extends SupportedValueType> = WithName<FailedOutput<ValueType>>;
+type FailedMockTestResult = WithName<FailedMockOutput>;
+type SuccessfulTestResult = WithName<SuccessfulOutput>;
+type ErroredTestResult = WithName<ErroredOutput>;
 
 export type TestResult<ValueType extends SupportedValueType> =
   | SuccessfulTestResult
