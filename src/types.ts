@@ -1,10 +1,26 @@
 export type SupportedValueType = number;
+
 type Modulator = "skip" | "only";
+
 type DisplayableTestResult = {
   display: (name: string) => void;
 };
 
-// Expect inputs and outputs (used for any scenario)
+// -------------------------------------- Test and Describe (high-level types) ------------------------------------- //
+
+export type Test<ValueType extends SupportedValueType> = {
+  name: string;
+  scenario: () => ExpectOutput<ValueType>;
+  modulator?: Modulator;
+};
+
+export type Describe = {
+  name: string;
+  tests: Test<any>[];
+};
+
+// -------------------------------------- Expect types (Used for any Scenario) ------------------------------------- //
+
 type SuccessfulOutput = {
   result: "success";
 } & DisplayableTestResult;
@@ -36,19 +52,8 @@ export type ExpectEqualInput<ValueType extends SupportedValueType> = {
   computed: ValueType;
 };
 
-// Test & Describe
-export type Test<ValueType extends SupportedValueType> = {
-  name: string;
-  scenario: () => ExpectOutput<ValueType>;
-  modulator?: Modulator;
-};
+// --------------------------------------- Test Results (For test execution) --------------------------------------- //
 
-export type Describe = {
-  name: string;
-  tests: Test<any>[];
-};
-
-// Test result
 type WithName<T> = T & { name: string };
 
 type FailedTestResult<ValueType extends SupportedValueType> = WithName<FailedOutput<ValueType>>;
@@ -62,7 +67,8 @@ export type TestResult<ValueType extends SupportedValueType> =
   | FailedMockTestResult
   | ErroredTestResult;
 
-// Mock
+// ------------------------------------------------------ Mock ----------------------------------------------------- //
+
 export type Mock = {
   (): unknown;
   returnValueOnce: (value: any) => any;
