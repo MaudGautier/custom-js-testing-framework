@@ -1,6 +1,6 @@
-import { Describe, ExpectEqualInput, ExpectOutput, Mock, Test, TestedValueType, TestResult } from "./types";
+import { Describe, ExpectEqualInput, ExpectOutput, Mock, Test, SupportedValueType, TestResult } from "./types";
 
-export const expectEqual = <ValueType extends TestedValueType>({
+export const expectEqual = <ValueType extends SupportedValueType>({
   expected,
   computed,
 }: ExpectEqualInput<ValueType>): ExpectOutput<ValueType> => {
@@ -25,7 +25,7 @@ export const expectEqual = <ValueType extends TestedValueType>({
   };
 };
 
-const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): TestResult<ValueType> => {
+const executeTest = <ValueType extends SupportedValueType>(test: Test<ValueType>): TestResult<ValueType> => {
   try {
     const output = test.scenario();
 
@@ -46,7 +46,7 @@ const executeTest = <ValueType extends TestedValueType>(test: Test<ValueType>): 
   }
 };
 
-const selectTestsToRun = <ValueType extends TestedValueType>(tests: Test<ValueType>[]) => {
+const selectTestsToRun = <ValueType extends SupportedValueType>(tests: Test<ValueType>[]) => {
   const onlyTests = tests.filter((test) => Boolean(test.modulator === "only"));
 
   if (onlyTests.length > 0) {
@@ -56,7 +56,7 @@ const selectTestsToRun = <ValueType extends TestedValueType>(tests: Test<ValueTy
   return tests.filter((test) => Boolean(test.modulator !== "skip"));
 };
 
-const displayTestResult = <ValueType extends TestedValueType>(testResult: TestResult<ValueType>) => {
+const displayTestResult = <ValueType extends SupportedValueType>(testResult: TestResult<ValueType>) => {
   console.log(testResult.display(testResult.name));
 };
 
@@ -64,7 +64,7 @@ const displayDescribe = (describe: Describe) => {
   console.log(`\n--------- ${describe.name} ----------`);
 };
 
-export const testRunner = <ValueType extends TestedValueType>(describe: Describe) => {
+export const testRunner = <ValueType extends SupportedValueType>(describe: Describe) => {
   const tests = describe.tests;
   const testsToRun = selectTestsToRun(tests);
 
