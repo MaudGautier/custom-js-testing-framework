@@ -78,9 +78,9 @@ export type TestResult<ValueType extends SupportedValueType> =
 
 // ------------------------------------------------------ Mock ----------------------------------------------------- //
 
-export type Mock = {
-  (): unknown;
-  returnValueOnce: (value: any) => any;
+export type Mock<T extends SupportedValueType> = {
+  (): T | undefined;
+  returnValueOnce: (value: T) => Mock<T>;
   expectToHaveBeenCalledNTimes: (nTimes: number) => ExpectOutput;
   expectToHaveBeenCalled: () => ExpectOutput;
 };

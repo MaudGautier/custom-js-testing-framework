@@ -1,7 +1,7 @@
-import { ExpectOutput, Mock } from "./types";
+import { ExpectOutput, Mock, SupportedValueType } from "./types";
 import { expectToHaveBeenCalled, expectToHaveBeenCalledNTimes } from "./matchers";
 
-export const createMock = <T>(values: T[] = []): Mock => {
+export const createMock = <T extends SupportedValueType>(values: T[] = []): Mock<T> => {
   function* generator(): Generator<T, T | undefined, T> {
     for (let i = 0; i < values.length; i++) {
       yield values[i];
