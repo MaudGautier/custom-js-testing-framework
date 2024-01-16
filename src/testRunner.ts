@@ -1,6 +1,8 @@
 import { Describe, SupportedValueType, Test, TestResult } from "./types";
 
-const executeTest = <ValueType extends SupportedValueType>(test: Test<ValueType>): TestResult<ValueType> => {
+const executeTest = <ValueType extends SupportedValueType, T extends Test<ValueType>>(
+  test: T
+): TestResult<ValueType> => {
   try {
     const output = test.scenario();
 
@@ -21,7 +23,7 @@ const executeTest = <ValueType extends SupportedValueType>(test: Test<ValueType>
   }
 };
 
-const selectTestsToRun = <ValueType extends SupportedValueType>(tests: Test<ValueType>[]) => {
+const selectTestsToRun = <ValueType extends SupportedValueType, T extends Test<ValueType>>(tests: T[]) => {
   const onlyTests = tests.filter((test) => Boolean(test.modulator === "only"));
 
   if (onlyTests.length > 0) {
@@ -39,7 +41,7 @@ const displayDescribe = (describe: Describe) => {
   console.log(`\n--------- ${describe.name} ----------`);
 };
 
-export const testRunner = <ValueType extends SupportedValueType>(describe: Describe) => {
+export const testRunner = (describe: Describe) => {
   const tests = describe.tests;
   const testsToRun = selectTestsToRun(tests);
 
@@ -48,6 +50,4 @@ export const testRunner = <ValueType extends SupportedValueType>(describe: Descr
   displayDescribe(describe);
 
   testResults.forEach(displayTestResult);
-
-  // displayFullReport(testResults)
 };

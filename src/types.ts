@@ -1,4 +1,4 @@
-export type SupportedValueType = number;
+export type SupportedValueType = number; // | string;
 
 type Modulator = "skip" | "only";
 
@@ -14,9 +14,11 @@ export type Test<ValueType extends SupportedValueType> = {
   modulator?: Modulator;
 };
 
+type AnyTest = Test<number>; // | Test<string>;
+
 export type Describe = {
   name: string;
-  tests: Test<any>[];
+  tests: AnyTest[];
 };
 
 // -------------------------------------- Expect types (Used for any Scenario) ------------------------------------- //
@@ -42,7 +44,7 @@ type ErroredOutput = {
   error: string;
 } & DisplayableTestResult;
 
-export type ExpectOutput<ValueType extends SupportedValueType = any> =
+export type ExpectOutput<ValueType extends SupportedValueType = SupportedValueType> =
   | SuccessfulOutput
   | FailedOutput<ValueType>
   | FailedMockOutput;
